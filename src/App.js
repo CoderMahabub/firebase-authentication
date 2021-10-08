@@ -1,12 +1,11 @@
 import initaializeAuthentication from "./Firebase/firebase.initialize";
-import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from "firebase/auth";
+import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, signOut } from "firebase/auth";
 import './App.css';
 import { useState } from "react";
 
-
-
+// Import Firebase Configuration
 initaializeAuthentication();
-
+// Step One of Authentication
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
@@ -14,8 +13,9 @@ const githubProvider = new GithubAuthProvider();
 function App() {
   const [user, setUser] = useState({});
 
+  // getAuth Common so Used globally
+  const auth = getAuth();
   const handleGoogleSignIn = () => {
-    const auth = getAuth();
     signInWithPopup(auth, googleProvider)
       .then((result) => {
         const { displayName, email, photoURL } = result.user;
@@ -32,7 +32,6 @@ function App() {
       });
   }
   const handleGithubSignIn = () => {
-    const auth = getAuth();
     signInWithPopup(auth, githubProvider)
       .then((result) => {
         const { displayName, email, photoURL } = result.user;
@@ -48,10 +47,20 @@ function App() {
         console.log(errorMessage);
       });
   }
+
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        setUser({});
+      })
+  }
   return (
     <div className="App">
-      <button onClick={handleGoogleSignIn}>Google Sign In</button>
-      <button onClick={handleGithubSignIn}>Github Sign In</button>
+      {!user.name ? <div>
+        <button onClick={handleGoogleSignIn}>Google Sign In</button>
+        <button onClick={handleGithubSignIn}>Github Sign In</button>
+      </div> :
+        <button onClick={handleSignOut}>Sign Out</button>}
       <br />
       {
         user.name && <div>
@@ -60,7 +69,6 @@ function App() {
           <img src={user.photo} alt="img" />
         </div>
       }
-
     </div>
   );
 }
